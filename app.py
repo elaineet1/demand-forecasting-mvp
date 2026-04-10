@@ -30,28 +30,318 @@ st.markdown(
     """
 <style>
     :root {
-        --primary: #1f4e79;
-        --accent: #0f6cbd;
-        --muted: #6b7280;
-        --card: #f8fafc;
-        --border: #e5e7eb;
+        --primary: #0f1728;
+        --accent: #4f8cff;
+        --accent-2: #9ac7ff;
+        --muted: #667085;
+        --card: #ffffff;
+        --border: rgba(15, 23, 40, 0.08);
+        --ink: #0f1728;
+        --bg: #f5f7fb;
+        --panel: #eef4ff;
     }
-    .block-container { padding-top: 2.25rem; }
-    h1, h2, h3 { color: var(--primary); }
+    .stApp {
+        background:
+            radial-gradient(circle at top right, rgba(79, 140, 255, 0.16), transparent 24%),
+            radial-gradient(circle at top left, rgba(198, 219, 255, 0.45), transparent 28%),
+            linear-gradient(180deg, #fbfcfe 0%, var(--bg) 100%);
+    }
+    .block-container { padding-top: 2.1rem; padding-bottom: 3rem; }
+    h1, h2, h3 { color: var(--primary); letter-spacing: -0.03em; }
     .hero {
-        background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 18px 22px;
+        background:
+            linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(246,249,255,0.96) 55%, rgba(237,244,255,0.98) 100%);
+        border: 1px solid rgba(255,255,255,0.65);
+        box-shadow: 0 24px 64px rgba(15, 23, 40, 0.08);
+        backdrop-filter: blur(12px);
+        border-radius: 30px;
+        padding: 22px 28px 20px;
+        margin-bottom: 14px;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero:before {
+        content: "";
+        position: absolute;
+        width: 360px;
+        height: 360px;
+        right: -90px;
+        top: -130px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(79,140,255,0.18) 0%, rgba(79,140,255,0.04) 56%, transparent 70%);
+    }
+    .hero-title {
+        font-size: 42px;
+        font-weight: 800;
+        margin: 0;
+        color: var(--ink);
+        letter-spacing: -0.03em;
+        max-width: 580px;
+        line-height: 1.02;
+    }
+    .hero-sub {
+        margin: 12px 0 0;
+        color: var(--muted);
+        font-weight: 500;
+        max-width: 560px;
+        font-size: 16px;
+        line-height: 1.45;
+    }
+    .hero-kicker {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
         margin-bottom: 14px;
     }
-    .hero-title { font-size: 28px; font-weight: 700; margin: 0; color: var(--primary); }
-    .hero-sub { margin: 4px 0 0; color: var(--muted); font-weight: 500; }
-    div[data-testid="stMetric"] {
-        background: var(--card);
+    .hero-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+        align-items: start;
+    }
+    .hero-copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 2px;
+        max-width: 780px;
+    }
+    .hero-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+    }
+    .hero-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: rgba(79,140,255,0.10);
+        color: var(--primary);
+        border: 1px solid rgba(79,140,255,0.16);
+        padding: 9px 13px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .hero-visual {
+        position: relative;
+        min-height: 220px;
+        border-radius: 26px;
+        background:
+            linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(250,252,255,0.98) 100%);
+        border: 1px solid rgba(15,23,40,0.06);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 18px 40px rgba(79,140,255,0.10);
+        overflow: hidden;
+        max-width: 960px;
+    }
+    .hero-visual svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .hero-visual-inner {
+        position: relative;
+        z-index: 2;
+        padding: 18px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .visual-kicker {
+        color: var(--accent);
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+    }
+    .visual-title {
+        color: var(--ink);
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 6px;
+    }
+    .visual-copy {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+        max-width: 360px;
+    }
+    .visual-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-top: 14px;
+    }
+    .visual-card {
+        border-radius: 18px;
+        background: rgba(255,255,255,0.84);
+        border: 1px solid rgba(15,23,40,0.08);
+        box-shadow: 0 10px 24px rgba(15,23,40,0.05);
+        padding: 12px 14px;
+    }
+    .visual-card-label {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+    .visual-card-value {
+        color: var(--ink);
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        margin-bottom: 4px;
+    }
+    .visual-card-copy {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+    }
+    .visual-footer {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+    }
+    .visual-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(79,140,255,0.10);
+        border: 1px solid rgba(79,140,255,0.16);
+        color: var(--primary);
+        font-size: 12px;
+        font-weight: 700;
+    }
+    .hero-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 10px;
+    }
+    .hero-card {
+        background: rgba(255,255,255,0.12);
+        border: 1px solid rgba(255,255,255,0.14);
+        backdrop-filter: blur(8px);
+        border-radius: 18px;
+        padding: 16px 18px;
+    }
+    .hero-card h4 {
+        margin: 0 0 8px;
+        color: var(--ink);
+        font-size: 15px;
+    }
+    .hero-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .mini-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin: 10px 0 18px;
+    }
+    .mini-card {
         border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 10px 12px;
+        border-radius: 22px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(248,251,254,0.98) 100%);
+        box-shadow: 0 20px 40px rgba(15, 23, 40, 0.06);
+        padding: 18px 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    .mini-card:after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary) 0%, #5a8dff 60%, var(--accent) 100%);
+    }
+    .mini-kicker {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--accent);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 6px;
+    }
+    .mini-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 8px;
+    }
+    .mini-copy {
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.5;
+    }
+    .workflow {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: linear-gradient(135deg, #ffffff 0%, var(--panel) 100%);
+        box-shadow: 0 20px 40px rgba(15, 23, 40, 0.06);
+        padding: 18px 20px;
+        margin: 12px 0 18px;
+    }
+    .workflow-title {
+        font-size: 19px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 12px;
+    }
+    .workflow-step {
+        margin: 8px 0;
+        color: #334155;
+        font-size: 14px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.84);
+        border: 1px solid rgba(15,39,68,0.08);
+    }
+    .section-card {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: rgba(255,255,255,0.96);
+        box-shadow: 0 20px 40px rgba(15, 23, 40, 0.06);
+        padding: 18px 20px;
+        height: 100%;
+    }
+    .section-card h3 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 20px;
+        color: var(--ink);
+    }
+    .section-card ul {
+        margin: 0;
+        padding-left: 1.1rem;
+        color: var(--muted);
+    }
+    .section-card li { margin: 8px 0; }
+    div[data-testid="stExpander"] {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: rgba(255,255,255,0.96);
+        box-shadow: 0 12px 24px rgba(22, 50, 79, 0.04);
+    }
+    div[data-testid="stMetric"] {
+        background: rgba(255,255,255,0.92);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        box-shadow: 0 18px 36px rgba(15, 23, 40, 0.06);
+        padding: 14px 16px;
     }
     div[data-testid="stMetric"] label { color: var(--muted); }
 </style>
@@ -63,131 +353,184 @@ st.markdown(
 st.markdown(
     """
 <div class="hero">
-  <div class="hero-title">ML-Assisted Demand & OTB Forecasting</div>
-  <div class="hero-sub">Forecasting MVP v0.1 • Theme v1</div>
+  <div class="hero-shell">
+    <div class="hero-copy">
+      <div class="hero-kicker">Retail Planning • AI-assisted</div>
+      <div class="hero-title">ML-Assisted Demand & OTB Forecasting</div>
+      <div class="hero-sub">A decision-ready retail planning workspace for forecasting demand, spotting stock risk, and generating buyer or leadership summaries.</div>
+      <div class="hero-actions">
+        <div class="hero-pill">Forecast demand</div>
+        <div class="hero-pill">Prioritize reorders</div>
+        <div class="hero-pill">Generate narratives</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <svg viewBox="0 0 520 360" role="img" aria-label="Product overview background">
+        <defs>
+          <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="18"/>
+          </filter>
+        </defs>
+        <circle cx="420" cy="78" r="70" fill="#d9ebff" filter="url(#blur)" opacity="0.9"/>
+        <circle cx="100" cy="270" r="82" fill="#ffe4bf" filter="url(#blur)" opacity="0.85"/>
+        <circle cx="250" cy="170" r="120" fill="#eef5ff" opacity="0.82"/>
+      </svg>
+      <div class="hero-visual-inner">
+        <div>
+          <div class="visual-kicker">What You Get In One Run</div>
+          <div class="visual-title">Planning-ready outputs</div>
+          <div class="visual-copy">This app is not just a chart. It gives a complete planning package: forecast quantities, stock risk, reorder actions, and stakeholder-ready narrative summaries.</div>
+        </div>
+        <div class="visual-grid">
+          <div class="visual-card">
+            <div class="visual-card-label">Forecast</div>
+            <div class="visual-card-value">SKU-level</div>
+            <div class="visual-card-copy">Next-month and 3-month demand projections by item.</div>
+          </div>
+          <div class="visual-card">
+            <div class="visual-card-label">Planning</div>
+            <div class="visual-card-value">OTB</div>
+            <div class="visual-card-copy">Recommended reorder actions based on projected stock cover.</div>
+          </div>
+          <div class="visual-card">
+            <div class="visual-card-label">Risk</div>
+            <div class="visual-card-value">Stock Health</div>
+            <div class="visual-card-copy">Understock and overstock exposure surfaced at a glance.</div>
+          </div>
+          <div class="visual-card">
+            <div class="visual-card-label">Narrative</div>
+            <div class="visual-card-value">Ready</div>
+            <div class="visual-card-copy">Executive, buyer, and risk summaries generated from the run.</div>
+          </div>
+        </div>
+        <div class="visual-footer">
+          <div class="visual-badge">Faster planning</div>
+          <div class="visual-badge">Clearer actions</div>
+          <div class="visual-badge">Better communication</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-grid">
+    <div class="hero-card">
+      <h4>Who It Serves</h4>
+      <p>Management, planners, and buyers who need faster monthly inventory decisions.</p>
+    </div>
+    <div class="hero-card">
+      <h4>What It Solves</h4>
+      <p>Combines forecast output, stock health, and reorder recommendations in one workflow.</p>
+    </div>
+    <div class="hero-card">
+      <h4>Why It Matters</h4>
+      <p>Turns raw files into decision-ready views, scenario planning, and narrative summaries.</p>
+    </div>
+  </div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-st.divider()
+st.markdown(
+    """
+<div class="mini-grid">
+  <div class="mini-card">
+    <div class="mini-kicker">Decision Support</div>
+    <div class="mini-title">Forecast Demand</div>
+    <div class="mini-copy">Estimate next-month and 3-month demand with ML plus fallback logic.</div>
+  </div>
+  <div class="mini-card">
+    <div class="mini-kicker">Inventory Health</div>
+    <div class="mini-title">Spot Stock Risk</div>
+    <div class="mini-copy">Identify understock and overstock exposure before purchases are locked in.</div>
+  </div>
+  <div class="mini-card">
+    <div class="mini-kicker">Communication</div>
+    <div class="mini-title">Generate Narratives</div>
+    <div class="mini-copy">Turn forecast outputs into executive, buyer, and risk-ready summaries.</div>
+  </div>
+</div>
 
-# Introduction
-st.markdown("""
-Welcome to the **ML-Assisted Demand & OTB Forecasting MVP**!
+<div class="workflow">
+  <div class="workflow-title">Fastest Demo Path</div>
+  <div class="workflow-step"><strong>1.</strong> Open <strong>Upload & Validation</strong> and load simulated 1-year data.</div>
+  <div class="workflow-step"><strong>2.</strong> Review <strong>Executive Dashboard</strong> for top actions and stock exposure.</div>
+  <div class="workflow-step"><strong>3.</strong> Use <strong>Narrative Co-Pilot</strong> to generate a pitch-ready summary.</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
-This application combines machine learning with business rules to help management
-and purchasing teams make better inventory decisions.
+col1, col2 = st.columns([1.25, 1])
+with col1:
+    st.markdown(
+        """
+<div class="section-card">
+  <h3>What This App Helps You Decide</h3>
+  <ul>
+    <li>Which SKUs need urgent reorder attention</li>
+    <li>Where stock is too lean or too heavy</li>
+    <li>How much demand to plan for over the next 1 to 3 months</li>
+    <li>Which brands or items deserve manual review first</li>
+  </ul>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+with col2:
+    st.markdown(
+        """
+<div class="section-card">
+  <h3>Version 1 Value</h3>
+  <ul>
+    <li>Faster planning cycles</li>
+    <li>Clearer reorder prioritization</li>
+    <li>More confidence in management discussions</li>
+    <li>Better communication across planning teams</li>
+  </ul>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
 
-### 🎯 What This App Does
+with st.expander("View Product Details", expanded=False):
+    st.markdown(
+        """
+**Main workflow**
 
-1. **Ingests** your inventory and sales files
-2. **Validates** data quality and normalizes column names
-3. **Trains** ML models on historical sales data
-4. **Forecasts** next-month, 2-month, and 3-month demand by SKU
-5. **Recommends** purchase quantities based on stock targets
-6. **Evaluates** stock health (understock, healthy, overstock)
-7. **Provides** dashboards and downloadable planning tables
+1. Upload inventory and sales files
+2. Validate and normalize the data
+3. Forecast demand and generate reorder recommendations
+4. Review executive metrics, SKU detail, and planning scenarios
+5. Generate buyer or leadership-ready narrative summaries
 
-### 📄 How to Use
+**Key capabilities**
 
-1. **Upload & Validation** (Step 1)
-   - Upload your inventory and sales files
-   - The app will automatically normalize column names and validate data
-   - Review warnings and summaries
+- Hybrid ML plus fallback logic
+- Time-aware validation
+- Stock health assessment
+- Explainability and model transparency
 
-2. **Executive Dashboard** (Step 2)
-   - View high-level planning metrics
-   - See stock health distribution
-   - Identify top reorder items
+**Current limitations**
 
-3. **Forecast Explorer** (Step 3)
-   - Drill into SKU-level details
-   - View sales history and forecasts
-   - Understand forecast drivers
-
-4. **OTB Planner** (Step 4)
-   - Review detailed recommendations
-   - Filter and sort by various criteria
-   - Download planning table as CSV/Excel
-
-5. **Model Insights** (Step 5)
-   - Review model performance metrics
-   - Understand feature importance
-   - Learn about assumptions and limitations
-
-6. **Narrative Co-Pilot** (Step 6)
-   - Draft executive and buyer-ready summaries
-   - Turn forecast outputs into stakeholder language
-   - Highlight priority risks and reorder actions
-
-### ⚙️ Key Features
-
-✅ **Hybrid ML + Fallback Logic**
-- Uses gradient boosting (LightGBM) where data exists
-- Falls back to brand/vendor averages for sparse items
-- Explicit forecast method tracking
-
-✅ **Time-Aware Validation**
-- No random shuffling of sales history
-- Respects time-series structure
-
-✅ **Stock Health Assessment**
-- Understock Risk: < 2 months of projected demand
-- Healthy Stock: 2-3 months of projected demand
-- Overstock Risk: > 3 months of projected demand
-
-✅ **Transparency & Explainability**
-- Feature importance charts
-- Per-SKU forecast explanations
-- Detailed assumptions documentation
-
-### ⚠️ Important Limitations (MVP)
-
-- **~2 Months Data**: Insufficient for seasonal modeling
-- **Sparse History**: Many SKUs will use fallback rules
-- **No Trend Breaking**: Assumes stable demand patterns
-- **Local Deployment**: Deploy on server for team access
-
-### 📊 Recommended Data Format
-
-**Inventory Files**:
-- Date in filename (e.g., `Item List_18.12.2021.xls`)
-- Columns: Item No, Description, Vendor, Total Stock, Item Status, Active (Y/N)
-
-**Sales Files**:
-- Date or date range in filename
-- Columns: Item No, Item Description, Quantity, Sales Amount
-
-### 🚀 Getting Started
-
-Click **"Upload & Validation"** in the sidebar to begin, or contact your analyst for help.
-""")
+- Short history reduces seasonal learning
+- Sparse items may rely on fallback rules
+- Best used as decision support, not as a sole source of truth
+        """
+    )
 
 # Sidebar
 with st.sidebar:
     st.markdown("## 📚 Navigation")
-    st.markdown("""
-    The app has 6 main pages:
-    
-    1. **📤 Upload & Validation**
-       - Upload files and start pipeline
-    
-    2. **📈 Executive Dashboard**
-       - High-level metrics and visualizations
-    
-    3. **🔍 Forecast Explorer**
-       - SKU-level detail and drill-down
-    
-4. **📋 OTB Planner**
-       - Download recommendations
-    
-    5. **🧠 Model Insights**
-       - Performance and transparency
-
-    6. **📝 Narrative Co-Pilot**
-       - Draft stakeholder-ready summaries
-    """)
+    st.markdown(
+        """
+`1.` **Upload & Validation**  
+`2.` **Executive Dashboard**  
+`3.` **Forecast Explorer**  
+`4.` **OTB Planner**  
+`5.` **Model Insights**  
+`6.` **Narrative Co-Pilot**
+        """
+    )
     
     st.divider()
     

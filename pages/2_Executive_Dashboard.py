@@ -6,7 +6,7 @@ High-level overview of planning metrics and visualizations.
 import streamlit as st
 import pandas as pd
 import math
-from src import state, config, charts
+from src import state, config, charts, copilot
 
 # Page config
 st.set_page_config(
@@ -22,25 +22,105 @@ st.markdown(
     """
 <style>
     :root {
-        --primary: #1f4e79;
-        --muted: #6b7280;
-        --card: #f8fafc;
-        --border: #e5e7eb;
+        --primary: #0f1728;
+        --accent: #4f8cff;
+        --accent-soft: #edf4ff;
+        --muted: #667085;
+        --card: #ffffff;
+        --border: rgba(15, 23, 40, 0.08);
+        --ink: #132033;
     }
-    h1, h2, h3 { color: var(--primary); }
+    .stApp {
+        background:
+            radial-gradient(circle at top right, rgba(79, 140, 255, 0.12), transparent 22%),
+            linear-gradient(180deg, #f9fbfe 0%, #f2f6fb 100%);
+    }
+    h1, h2, h3 { color: var(--primary); letter-spacing: -0.02em; }
     div[data-testid="stMetric"] {
-        background: var(--card);
+        background: rgba(255,255,255,0.94);
         border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 10px 12px;
+        border-radius: 18px;
+        box-shadow: 0 18px 36px rgba(15, 23, 40, 0.06);
+        padding: 14px 16px;
     }
     div[data-testid="stMetric"] label { color: var(--muted); }
+    .summary-panel {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(246,249,255,0.98) 100%);
+        box-shadow: 0 24px 48px rgba(15, 23, 40, 0.08);
+        padding: 22px 24px;
+        margin-bottom: 12px;
+    }
+    .summary-panel-content h2,
+    .summary-panel-content h3,
+    .summary-panel-content h4,
+    .summary-panel-content p,
+    .summary-panel-content li,
+    .summary-panel-content strong,
+    .summary-panel-content code {
+        color: var(--ink) !important;
+    }
+    .summary-panel-content ul,
+    .summary-panel-content ol {
+        color: var(--ink) !important;
+        padding-left: 1.2rem;
+    }
+    .summary-panel-content li {
+        margin: 6px 0;
+    }
+    .action-panel {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 16px 30px rgba(22, 50, 79, 0.08);
+        padding: 18px 20px;
+        margin-bottom: 12px;
+    }
+    .dash-kicker {
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+    }
+    .hero-strip {
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(237,244,255,0.98) 100%);
+        box-shadow: 0 20px 40px rgba(15, 23, 40, 0.06);
+        padding: 16px 18px;
+        margin: 6px 0 16px;
+    }
+    .hero-strip-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: var(--ink);
+        margin-bottom: 4px;
+    }
+    .hero-strip-copy {
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+        max-width: 620px;
+    }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
 st.title("📈 Executive Dashboard")
+st.markdown('<div class="dash-kicker">Leadership summary • Stock risk snapshot</div>', unsafe_allow_html=True)
+st.markdown(
+    """
+<div class="hero-strip">
+  <div class="hero-strip-title">Action-first planning view</div>
+  <div class="hero-strip-copy">Use this page to see what matters now: demand outlook, reorder pressure, and stock imbalance before you dive into SKU detail.</div>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 # Check if data is loaded
 forecast_results = st.session_state.get(config.STATE_FORECAST_RESULTS)
@@ -55,11 +135,74 @@ else:
         st.error("❌ No forecast output available")
     else:
         # ====================================================================
+        # Executive Summary
+        # ====================================================================
+        st.subheader("🧭 Executive Summary")
+
+        context = copilot.get_copilot_context(forecast_results)
+        metrics = context.get("metrics", {})
+        top_reorder_lines = context.get("top_reorder_lines", [])
+        top_overstock_lines = context.get("top_overstock_lines", [])
+
+        quick_summary = copilot.generate_narrative(
+            forecast_results,
+            narrative_type="executive",
+            focus_note="Keep this summary concise and leadership-ready.",
+        )
+
+        left, right = st.columns([1.4, 1])
+        with left:
+            st.markdown('<div class="summary-panel"><div class="summary-panel-content">', unsafe_allow_html=True)
+            st.markdown(quick_summary)
+            st.markdown('</div></div>', unsafe_allow_html=True)
+
+        with right:
+            st.markdown('<div class="action-panel">', unsafe_allow_html=True)
+            st.markdown("**Top actions this month**")
+            if metrics.get("understock_count", 0) > 0:
+                st.info(
+                    f"{metrics['understock_count']} SKUs need attention. "
+                    f"Recommended reorder: {metrics.get('total_reorder_qty', 0)} units."
+                )
+            else:
+                st.success("No understock-risk SKUs are currently flagged.")
+
+            if metrics.get("overstock_count", 0) > 0:
+                st.warning(
+                    f"{metrics['overstock_count']} SKUs should be reviewed for slowdown, clearance, or delayed buying."
+                )
+            else:
+                st.success("No material overstock positions were detected.")
+
+            st.caption(
+                f"Coverage: {metrics.get('ml_coverage', '0%')} ML | "
+                f"{metrics.get('fallback_coverage', '0%')} fallback"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        action_col1, action_col2 = st.columns(2)
+        with action_col1:
+            st.markdown("**Priority reorder items**")
+            if top_reorder_lines:
+                for line in top_reorder_lines[:3]:
+                    st.markdown(line)
+            else:
+                st.write("No urgent reorder items identified.")
+        with action_col2:
+            st.markdown("**Inventory caution items**")
+            if top_overstock_lines:
+                for line in top_overstock_lines[:3]:
+                    st.markdown(line)
+            else:
+                st.write("No overstock watchlist items identified.")
+
+        st.divider()
+
+        # ====================================================================
         # Key Metrics
         # ====================================================================
         st.subheader("📊 Key Planning Metrics")
-        
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4, col5 = st.columns(5, gap="medium")
         
         with col1:
             total_active = planning_summary.get('total_active_skus', 0)
@@ -84,7 +227,7 @@ else:
         # ====================================================================
         # Stock Health Overview
         # ====================================================================
-        col1, col2 = st.columns([2, 2])
+        col1, col2 = st.columns([2, 2], gap="large")
         
         with col1:
             st.subheader("📊 Stock Health Distribution")
@@ -107,7 +250,7 @@ else:
         # ====================================================================
         # Forecast Method Distribution
         # ====================================================================
-        col1, col2 = st.columns([2, 2])
+        col1, col2 = st.columns([2, 2], gap="large")
         
         with col1:
             st.subheader("🎯 Forecast Method Distribution")
@@ -188,21 +331,29 @@ else:
         else:
             st.info("✓ No items require reorder or overstock action at this time")
         
-        # ====================================================================
-        # Vendor Analysis
-        # ====================================================================
-        col1, col2 = st.columns([1, 1])
-        
-        with col1:
-            st.subheader("📦 Reorder by Top Brands")
-            vendor_fig = charts.chart_vendor_reorder_totals(planner_output, top_n=8)
-            st.plotly_chart(vendor_fig, use_container_width=True)
-        
-        with col2:
-            st.subheader("📈 Stock vs. 3-Month Demand")
-            demand_fig = charts.chart_forecast_vs_stock(planner_output, max_items=10)
-            st.plotly_chart(demand_fig, use_container_width=True)
-        
+        analysis_tab, detail_tab = st.tabs(["Charts", "Details"])
+        with analysis_tab:
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                st.subheader("📦 Reorder by Top Brands")
+                vendor_fig = charts.chart_vendor_reorder_totals(planner_output, top_n=8)
+                st.plotly_chart(vendor_fig, use_container_width=True)
+            with col2:
+                st.subheader("📈 Stock vs. 3-Month Demand")
+                demand_fig = charts.chart_forecast_vs_stock(planner_output, max_items=10)
+                st.plotly_chart(demand_fig, use_container_width=True)
+        with detail_tab:
+            st.markdown(
+                "Use this page for the headline view. Move to **Forecast Explorer** for SKU detail "
+                "and **OTB Planner** for scenario-level planning."
+            )
+            if forecast_results.get('warnings'):
+                st.markdown("**Current warnings**")
+                for warning in forecast_results['warnings'][:5]:
+                    st.warning(f"⚠️ {warning}")
+            else:
+                st.success("No active warnings for this run.")
+
         # ====================================================================
         # Data Quality Notes
         # ====================================================================
