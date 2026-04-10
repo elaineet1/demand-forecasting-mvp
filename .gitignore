@@ -1,0 +1,23 @@
+.streamlit/secrets.toml
+
+# Keep the template file in version control
+!.streamlit/secrets.toml.example
+
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+venv/
+.venv/
+env/
+
+# Local output folders
+output/
+outputs/
+
+# Large local/raw datasets for backup-friendly repo
+data/Inventory/
+data/Sales/
+Sample/
