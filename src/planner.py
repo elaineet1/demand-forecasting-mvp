@@ -221,6 +221,19 @@ def create_otp_planner_output(forecast_df: pd.DataFrame,
         axis=1
     )
     result['remark'] = result.apply(generate_reorder_remark, axis=1)
+
+    # Stock cover months: current stock ÷ latest monthly sales (fallback to recent 3m avg)
+    monthly_demand = pd.to_numeric(result.get('latest_monthly_sales', 0), errors='coerce').fillna(0)
+    if 'recent_3m_avg' in result.columns:
+        monthly_demand = monthly_demand.where(
+            monthly_demand > 0,
+            pd.to_numeric(result['recent_3m_avg'], errors='coerce').fillna(0)
+        )
+    result['stock_cover_months'] = np.where(
+        monthly_demand > 0,
+        (result['total_stock'] / monthly_demand).round(1),
+        np.nan
+    )
     
     # Keep only active SKUs
     if 'active' in result.columns:
@@ -254,7 +267,7 @@ def create_otp_planner_output(forecast_df: pd.DataFrame,
         'total_stock', 'warehouse_stock',
         'latest_monthly_sales', 'recent_3m_avg', 'overstock_qty',
         'latest_monthly_forecast', 'forecast_m1', 'forecast_m2', 'forecast_m3',
-        'projected_3m_demand', 'reorder_qty', 'stock_health',
+        'projected_3m_demand', 'reorder_qty', 'stock_cover_months', 'stock_health',
         'forecast_method', 'remark', 'event_applied_any', 'base_price', 'rrp'
     ]
     

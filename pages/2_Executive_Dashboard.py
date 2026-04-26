@@ -6,7 +6,7 @@ High-level overview of planning metrics and visualizations.
 import streamlit as st
 import pandas as pd
 import math
-from src import state, config, charts, copilot
+from src import state, config, charts, copilot, rag
 
 # Page config
 st.set_page_config(
@@ -109,6 +109,8 @@ st.markdown(
 """,
     unsafe_allow_html=True,
 )
+
+rag.render_sidebar_chat()
 
 st.title("📈 Executive Dashboard")
 st.markdown('<div class="dash-kicker">Leadership summary • Stock risk snapshot</div>', unsafe_allow_html=True)

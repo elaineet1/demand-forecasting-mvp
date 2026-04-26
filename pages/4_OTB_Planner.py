@@ -50,6 +50,7 @@ if forecast_results is None:
     st.warning("⚠️ No data loaded yet. Please go to **Upload & Validation** first.")
 else:
     planner_output = forecast_results.get('planner_output')
+    master_data = forecast_results.get('master_data')
     
     if planner_output is None or (hasattr(planner_output, 'empty') and planner_output.empty):
         st.error("❌ No OTB output available")
@@ -223,6 +224,7 @@ else:
             'vendor',
             'manufacturer',
             'total_stock',
+            'stock_cover_months',
             'warehouse_stock',
             'latest_monthly_sales',
             'recent_3m_avg',
@@ -302,6 +304,7 @@ else:
                 'scenario_reorder_qty': st.column_config.NumberColumn(format="%.0f"),
                 'scenario_overstock_qty': st.column_config.NumberColumn(format="%.0f"),
                 'total_stock': st.column_config.NumberColumn(format="%.0f"),
+                'stock_cover_months': st.column_config.NumberColumn(label="Stock Cover (months)", format="%.1f"),
                 'base_price': st.column_config.NumberColumn(format="%.2f"),
                 'rrp': st.column_config.NumberColumn(format="%.2f"),
             }
@@ -376,3 +379,6 @@ else:
                 method_counts = filtered_planner['forecast_method'].value_counts()
                 for method, count in method_counts.items():
                     st.text(f"  {method.replace('_', ' ').title()}: {count}")
+
+from src import rag as _rag
+_rag.render_sidebar_chat()

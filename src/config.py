@@ -129,6 +129,11 @@ STATE_FORECAST_RESULTS = 'forecast_results'
 STATE_MODEL_METRICS = 'model_metrics'
 STATE_FEATURE_IMPORTANCE = 'feature_importance'
 
+# RAG chat state keys
+STATE_RAG_DOCUMENTS = 'rag_documents'
+STATE_RAG_EMBEDDINGS = 'rag_embeddings'
+STATE_RAG_CHAT_HISTORY = 'rag_chat_history'
+
 # ==============================================================================
 # METRICS THRESHOLDS AND DISPLAY
 # ==============================================================================

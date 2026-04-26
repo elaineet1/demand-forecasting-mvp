@@ -10,8 +10,8 @@ from src import config, state
 
 
 st.set_page_config(
-    page_title="Narrative Co-Pilot",
-    page_icon="📝",
+    page_title="Insights & Report Generator",
+    page_icon="📊",
     layout="wide",
 )
 
@@ -63,8 +63,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-st.title("📝 Narrative Co-Pilot")
-st.markdown('<div class="copilot-kicker">Narrative workspace • Executive, buyer, and risk modes</div>', unsafe_allow_html=True)
+st.title("📊 Insights & Report Generator")
+st.markdown('<div class="copilot-kicker">AI-powered narrative workspace • Executive, buyer, and risk modes</div>', unsafe_allow_html=True)
 st.markdown(
     """
 <div class="copilot-banner">
@@ -262,3 +262,6 @@ Use this page when you want a management-friendly readout without manually stitc
 - To enable OpenAI, set `OPENAI_API_KEY` and optionally `OPENAI_MODEL` in your shell or `.streamlit/secrets.toml`.
                 """
             )
+
+from src import rag as _rag
+_rag.render_sidebar_chat()

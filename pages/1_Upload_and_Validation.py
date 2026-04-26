@@ -343,3 +343,6 @@ if forecast_results is not None:
     # Navigation
     st.divider()
     st.info("✨ Files are ready! Navigate to **Executive Dashboard** to see insights.")
+
+from src import rag as _rag
+_rag.render_sidebar_chat()

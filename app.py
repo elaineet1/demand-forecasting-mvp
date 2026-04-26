@@ -3,7 +3,7 @@ Main Streamlit app entry point for ML-Assisted Demand & OTB Forecasting MVP.
 """
 
 import streamlit as st
-from src import state, config
+from src import state, config, rag
 
 # Configure page
 st.set_page_config(
@@ -528,7 +528,8 @@ with st.sidebar:
 `3.` **Forecast Explorer**  
 `4.` **OTB Planner**  
 `5.` **Model Insights**  
-`6.` **Narrative Co-Pilot**
+`6.` **Insights & Report Generator**
+`7.` **Forecast Chat**
         """
     )
     
@@ -557,6 +558,8 @@ with st.sidebar:
             st.error("❌ Forecast failed")
     else:
         st.info("⏳ Awaiting data upload")
+
+rag.render_sidebar_chat()
 
 # Footer
 st.divider()

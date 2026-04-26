@@ -84,13 +84,13 @@ else:
         # Apply Filters
         # ====================================================================
         filtered_df = planner_output.copy()
-        
+
         if selected_health != 'All':
             filtered_df = filtered_df[filtered_df['stock_health'] == selected_health]
-        
+
         if selected_vendor != 'All':
             filtered_df = filtered_df[filtered_df['vendor'] == selected_vendor]
-        
+
         # ====================================================================
         # Summary
         # ====================================================================
@@ -165,6 +165,11 @@ else:
                 
                 with col2:
                     st.metric("Current Stock", f"{selected_row['total_stock']:.0f}")
+                    cover = selected_row.get('stock_cover_months')
+                    st.metric(
+                        "Stock Cover (months)",
+                        f"{cover:.1f}" if pd.notna(cover) else "N/A"
+                    )
                     latest_sales = selected_row.get('latest_monthly_sales')
                     if pd.notna(latest_sales):
                         st.metric("Latest Monthly Sales", f"{latest_sales:.0f}")
@@ -251,13 +256,23 @@ else:
 
         display_cols = [
             'item_no', 'item_description', 'vendor',
-            'total_stock', 'latest_monthly_sales', 'recent_3m_avg', 'forecast_m1', 'forecast_m2', 'forecast_m3',
-            'projected_3m_demand', 'reorder_qty', 'stock_health', 'forecast_method', 'remark', 'event_applied_any'
+            'total_stock', 'stock_cover_months',
+            'latest_monthly_sales', 'recent_3m_avg', 'forecast_m1', 'forecast_m2', 'forecast_m3',
+            'projected_3m_demand', 'reorder_qty', 'stock_health',
+            'forecast_method', 'remark', 'event_applied_any'
         ]
         available_cols = [col for col in display_cols if col in filtered_df.columns]
-        
+
         st.dataframe(
             filtered_df[available_cols].reset_index(drop=True),
             use_container_width=True,
-            height=600
+            height=600,
+            column_config={
+                'stock_cover_months': st.column_config.NumberColumn(
+                    label='Stock Cover (months)', format='%.1f'
+                ),
+            }
         )
+
+from src import rag as _rag
+_rag.render_sidebar_chat()

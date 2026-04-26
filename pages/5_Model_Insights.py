@@ -250,3 +250,6 @@ else:
         if forecast_results.get('warnings'):
             for warning in forecast_results['warnings']:
                 st.warning(warning)
+
+from src import rag as _rag
+_rag.render_sidebar_chat()
