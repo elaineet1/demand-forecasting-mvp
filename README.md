@@ -478,6 +478,6 @@ This MVP is provided as-is for educational and planning support purposes.
 
 ---
 
-**Last Updated**: April 2024  
+**Last Updated**: April 2025  
 **Python Version**: 3.11  
 **Status**: MVP (Production-ready for small-scale use)
