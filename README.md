@@ -472,7 +472,7 @@ Edit `src/column_mapper.py` `COLUMN_VARIANTS` dict:
 ## License & Attribution
 
 **ML-Assisted Demand & OTB Forecasting MVP v0.1**  
-Date: 2024  
+Date: 2026  
 
 This MVP is provided as-is for educational and planning support purposes.
 
