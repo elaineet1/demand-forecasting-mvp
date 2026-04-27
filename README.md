@@ -68,9 +68,11 @@ This MVP combines machine learning with fallback business rules to forecast sale
 ✅ **Time-Aware ML Validation** - Respects time-series structure  
 ✅ **Hybrid ML + Fallback** - Graceful degradation for sparse data  
 ✅ **Stock Health Assessment** - Categorizes risk (understock/healthy/overstock)  
+✅ **Stock Cover Months** - Current stock ÷ latest monthly sales per SKU  
 ✅ **Explainability** - Feature importance and per-SKU explanations  
 ✅ **Downloadable Output** - CSV/Excel/JSON planner table  
-✅ **Multi-page Dashboard** - Executive, detail, and insight views
+✅ **Multi-page Dashboard** - Executive, detail, and insight views  
+✅ **Ask Your Data (RAG Chatbot)** - Free-form Q&A on forecast data and uploaded documents
 
 ---
 
@@ -84,11 +86,13 @@ forecasting_mvp/
 ├── .streamlit/
 │   └── config.toml                 # Streamlit configuration
 ├── pages/
-│   ├── 1_Upload_and_Validation.py  # File intake and validation
-│   ├── 2_Executive_Dashboard.py    # High-level metrics
-│   ├── 3_Forecast_Explorer.py      # SKU-level drill-down
-│   ├── 4_OTB_Planner.py            # Downloadable recommendations (OTB)
-│   └── 5_Model_Insights.py         # Performance and transparency
+│   ├── 1_Upload_and_Validation.py          # File intake and validation
+│   ├── 2_Executive_Dashboard.py            # High-level metrics
+│   ├── 3_Forecast_Explorer.py              # SKU-level drill-down
+│   ├── 4_OTB_Planner.py                    # Downloadable recommendations (OTB)
+│   ├── 5_Model_Insights.py                 # Performance and transparency
+│   ├── 6_Insights_and_Report_Generator.py  # AI-generated narratives and reports
+│   └── 7_Forecast_Chat.py                  # Full-page RAG chatbot
 ├── src/
 │   ├── __init__.py
 │   ├── config.py                   # Global constants and thresholds
@@ -104,6 +108,7 @@ forecasting_mvp/
 │   ├── planner.py                  # OTB planning logic
 │   ├── metrics.py                  # Evaluation metrics
 │   ├── explainability.py           # Transparency and explanations
+│   ├── rag.py                      # RAG chatbot (embeddings, retrieval, sidebar UI)
 │   └── charts.py                   # Plotly visualizations
 ├── sample_data/                    # (Empty; for samples/templates)
 └── outputs/                        # (Empty; for downloaded files)
@@ -119,6 +124,8 @@ forecasting_mvp/
 | **Data** | Pandas, NumPy | Data manipulation |
 | **ML** | LightGBM, Scikit-learn | Gradient boosting regression |
 | **Viz** | Plotly | Interactive charts |
+| **AI / RAG** | OpenAI (`text-embedding-3-small`, `gpt-4.1-mini`) | Embeddings and chat completions |
+| **Document Parsing** | pypdf | PDF text extraction for RAG |
 | **Utilities** | Openpyxl, xlrd, Python-dateutil | File I/O and dates |
 
 ### Model Selection
@@ -195,11 +202,11 @@ streamlit run app.py
 
 Open browser to `http://localhost:8501`
 
-### Optional: Enable OpenAI For Narrative Co-Pilot
+### Optional: Enable OpenAI for AI Features
 
-The Narrative Co-Pilot page can use OpenAI for richer business summaries.
+OpenAI powers two features: the **Insights & Report Generator** page (business narrative summaries) and the **Ask Your Data chatbot** (sidebar Q&A on every page).
 
-1. Install dependencies:
+1. Install dependencies (already included in `requirements.txt`):
 
 ```bash
 pip install -r requirements.txt
@@ -218,15 +225,37 @@ You can start from the included template file:
 cp .streamlit/secrets.toml.example .streamlit/secrets.toml
 ```
 
-3. Run the app and open the **Narrative Co-Pilot** page.
+3. Run the app — the sidebar chatbot will appear on every page, and the **Insights & Report Generator** and **Forecast Chat** pages will be fully enabled.
+
+> **Streamlit Community Cloud**: Instead of a local `secrets.toml`, go to your app's **Settings → Secrets** in the Streamlit Cloud dashboard and paste the key-value pairs there.
 
 ### Step 3: Navigate Pages
 
 1. **Upload & Validation**: Upload files, review column mapping
 2. **Executive Dashboard**: Review high-level metrics and health distribution
-3. **Forecast Explorer**: Drill into individual SKUs and sales history
-4. **OTB Planner**: Review and download recommendation table
+3. **Forecast Explorer**: Drill into individual SKUs, sales history, and stock cover months
+4. **OTB Planner**: Review and download recommendation table with scenario planning
 5. **Model Insights**: Check model performance and assumptions
+6. **Insights & Report Generator**: AI-generated narrative summaries and business reports
+7. **Forecast Chat**: Full-page conversational Q&A on your forecast data
+
+### Ask Your Data (RAG Chatbot)
+
+A sidebar chatbot is available on every page once an OpenAI key is configured. It uses Retrieval-Augmented Generation (RAG) to answer questions grounded in your actual forecast data.
+
+**What you can ask:**
+- "Which SKUs are understocked this month?"
+- "What is the reorder quantity for brand X?"
+- "Which items have the highest overstock risk?"
+- "Summarise the stock health across all categories."
+
+**Uploading documents:**  
+Expand the **Upload a document** section in the sidebar to attach PDF or TXT files (e.g. supplier price lists, buying policies). The chatbot will include those documents as additional context when answering questions.
+
+**How it works:**
+1. Forecast data is automatically converted into text documents and embedded using `text-embedding-3-small`.
+2. Embeddings are cached in session state — no re-embedding on every message.
+3. The most relevant chunks (forecast data + any uploaded files) are retrieved by cosine similarity and passed to `gpt-4.1-mini` as context.
 
 ---
 
@@ -386,6 +415,24 @@ pip install lightgbm
 **Cause**: Too many rows to process  
 **Solution**: Pre-filter files to recent months; split into smaller uploads
 
+### Issue: Sidebar chatbot does not appear
+
+**Cause**: OpenAI API key not configured  
+**Solution**: Add `OPENAI_API_KEY` to `.streamlit/secrets.toml` (local) or Streamlit Cloud Secrets (deployed)
+
+### Issue: "OpenAI package required" error on Forecast Chat page
+
+**Solution**:
+```bash
+pip install openai pypdf
+```
+Both are included in `requirements.txt` — ensure you have the latest dependencies installed.
+
+### Issue: Stock Cover (months) shows as N/A
+
+**Cause**: No sales data available for that SKU (`latest_monthly_sales` and `recent_3m_avg` are both zero)  
+**Solution**: This is expected for new/inactive SKUs with no sales history. The column will populate once sales data exists.
+
 ---
 
 ## Performance & Deployment Notes
@@ -396,18 +443,29 @@ pip install lightgbm
 - **Max File Size**: 200 MB per file (configurable in config.py)
 - **Memory Usage**: ~1 GB for typical dataset
 
-### Production Deployment
+### Streamlit Community Cloud (Recommended for Team Sharing)
 
-For team deployment:
+1. Push the repository to GitHub (the repo must be public, or you must have a Streamlit Cloud account linked to a private repo).
+2. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**.
+3. Select your repo, branch (`main`), and entry file (`app.py`).
+4. Click **Advanced settings → Secrets** and paste:
+
+```toml
+OPENAI_API_KEY = "your_openai_api_key"
+OPENAI_MODEL = "gpt-4.1-mini"
+```
+
+5. Click **Deploy**. The app will be live at a public URL within a few minutes.
+
+> **Do not commit `.streamlit/secrets.toml`** — it is already in `.gitignore`. Manage all secrets through the Streamlit Cloud UI.
+
+### Self-Hosted / Docker
 
 ```bash
-# Option 1: Streamlit Cloud
-# Push to GitHub, connect to Streamlit Cloud
-
-# Option 2: Self-hosted
+# Option 1: Self-hosted
 streamlit run app.py --server.port 8501 --server.address 0.0.0.0
 
-# Option 3: Docker
+# Option 2: Docker
 docker build -t company_forecast .
 docker run -p 8501:8501 company_forecast
 ```
@@ -478,6 +536,6 @@ This MVP is provided as-is for educational and planning support purposes.
 
 ---
 
-**Last Updated**: April 2026  
+**Last Updated**: April 2026 (v0.2.0 — RAG chatbot, Insights & Report Generator, stock cover months)  
 **Python Version**: 3.11  
 **Status**: MVP (Production-ready for small-scale use)
