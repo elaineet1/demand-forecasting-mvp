@@ -113,7 +113,7 @@ def _dashboard_buttons() -> InlineKeyboardMarkup:
         ],
         [
             InlineKeyboardButton("🔍 Forecast Explorer", url=STREAMLIT_APP_URL),
-            InlineKeyboardButton("💬 Full Forecast Chat", url=STREAMLIT_APP_URL),
+            InlineKeyboardButton("📈 Charts & Reports", url=STREAMLIT_APP_URL),
         ],
         [
             InlineKeyboardButton("📋 File Format Help", callback_data="file_help"),
@@ -403,9 +403,13 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "1. Tap Upload & Run Forecast in the app\n"
             "2. Upload inventory and sales files\n"
             "3. Run the forecast\n"
-            "4. Come back here and:\n"
-            "   • Use /summary, /reorders, /health, /sku\n"
-            "   • Or just *type any question* to chat with your data",
+            "4. Come back here — no need to open the app again:\n\n"
+            "   📊 /summary — portfolio snapshot\n"
+            "   🛒 /reorders — what to buy\n"
+            "   📦 /health — stock health\n"
+            "   🔍 /sku ITEM — one SKU detail\n\n"
+            "   💬 *Or just type any question* and I will answer\n"
+            "   directly from your forecast data.",
             reply_markup=_back_button(),
             parse_mode="Markdown"
         )
