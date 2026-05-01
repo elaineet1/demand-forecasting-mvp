@@ -349,22 +349,17 @@ def chat_completion(
 
     client = OpenAI(api_key=api_key)
 
-    # Build messages with history
-    messages = []
+    # Build messages: system context first, then history, then current RAG-grounded query
+    messages = [{"role": "system", "content": rag_prompt}]
 
-    # Add chat history (simplified - just last few messages)
     if chat_history:
-        for msg in chat_history[-6:]:  # Keep last 6 messages (3 exchanges)
+        for msg in chat_history[-6:]:  # last 3 exchanges for context
             messages.append({
                 "role": msg.get("role", "user"),
                 "content": msg.get("content", ""),
             })
 
-    # Add current query
-    messages.append({
-        "role": "user",
-        "content": rag_prompt,
-    })
+    messages.append({"role": "user", "content": query})
 
     try:
         response = client.chat.completions.create(
@@ -477,7 +472,10 @@ def _get_cached_embeddings(
     try:
         import streamlit as st
         planner_output = forecast_results.get("planner_output")
-        cache_key = len(planner_output) if planner_output is not None else 0
+        if planner_output is not None and not planner_output.empty:
+            cache_key = hash(pd.util.hash_pandas_object(planner_output).sum())
+        else:
+            cache_key = 0
         cached = st.session_state.get(_RAG_EMB_CACHE_KEY)
         if cached and cached.get("key") == cache_key:
             return cached["embeddings"], cached["documents"]

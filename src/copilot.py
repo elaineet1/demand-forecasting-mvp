@@ -243,12 +243,14 @@ def generate_narrative_with_openai(
     client = OpenAI(api_key=api_key)
     prompt = _build_openai_prompt(context, narrative_type=narrative_type, focus_note=focus_note)
 
-    response = client.responses.create(
+    response = client.chat.completions.create(
         model=model,
-        input=prompt,
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.7,
+        max_tokens=1200,
     )
 
-    text = getattr(response, "output_text", None)
+    text = response.choices[0].message.content
     if text:
         return text.strip()
 

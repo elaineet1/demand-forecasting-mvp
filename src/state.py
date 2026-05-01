@@ -65,6 +65,9 @@ def clear_all_state():
         config.STATE_FORECAST_RESULTS,
         config.STATE_MODEL_METRICS,
         config.STATE_FEATURE_IMPORTANCE,
+        config.STATE_RAG_DOCUMENTS,
+        config.STATE_RAG_EMBEDDINGS,
+        config.STATE_RAG_CHAT_HISTORY,
     ]
     for key in keys:
         if key in st.session_state:

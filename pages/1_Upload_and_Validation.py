@@ -8,7 +8,7 @@ import pandas as pd
 from pathlib import Path
 from src import (
     state, config, io_utils, column_mapper,
-    validators, forecasting
+    validators, forecasting, persistence
 )
 
 # Page config
@@ -20,6 +20,13 @@ st.set_page_config(
 
 # Initialize session state
 state.initialize_session_state()
+
+# Restore persisted forecast into session state if this is a fresh session
+if not st.session_state.get(config.STATE_FORECAST_RESULTS) and persistence.has_saved_run():
+    saved = persistence.load_run()
+    if saved:
+        st.session_state[config.STATE_FORECAST_RESULTS] = saved
+        st.info(f"📂 Loaded previous forecast from disk. Run a new upload to refresh.")
 
 st.markdown(
     """

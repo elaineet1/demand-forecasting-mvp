@@ -11,7 +11,7 @@ from datetime import datetime
 from src import (
     config, io_utils, column_mapper, validators,
     preprocess, feature_engineering, model_train,
-    fallback, planner, metrics
+    fallback, planner, metrics, persistence
 )
 
 
@@ -309,8 +309,11 @@ def end_to_end_forecast_pipeline(
         
         results['planner_output'] = planner_output
         results['planning_summary'] = planner_summary
+        results['feature_cols'] = feature_cols
         results['success'] = True
-        
+
+        persistence.save_run(results, feature_cols)
+
         if verbose:
             print("✓ Pipeline complete!")
             print(f"  Total active SKUs: {planner_summary['total_active_skus']}")

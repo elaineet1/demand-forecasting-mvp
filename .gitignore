@@ -17,7 +17,16 @@ env/
 output/
 outputs/
 
+# Persisted model artifacts (generated at runtime)
+artifacts/
+
 # Large local/raw datasets for backup-friendly repo
 data/Inventory/
 data/Sales/
 Sample/
+
+.env
+.streamlit/secrets.toml
+__pycache__/
+venv/
+.venv/

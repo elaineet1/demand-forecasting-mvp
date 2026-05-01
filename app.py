@@ -3,7 +3,7 @@ Main Streamlit app entry point for ML-Assisted Demand & OTB Forecasting MVP.
 """
 
 import streamlit as st
-from src import state, config, rag
+from src import state, config, rag, persistence
 
 # Configure page
 st.set_page_config(
@@ -24,6 +24,12 @@ st.markdown("""
 
 # Initialize session state
 state.initialize_session_state()
+
+# Restore persisted forecast into session state if this is a fresh session
+if not st.session_state.get(config.STATE_FORECAST_RESULTS) and persistence.has_saved_run():
+    saved = persistence.load_run()
+    if saved:
+        st.session_state[config.STATE_FORECAST_RESULTS] = saved
 
 # Global styling
 st.markdown(
@@ -562,10 +568,11 @@ with st.sidebar:
 rag.render_sidebar_chat()
 
 # Footer
+import datetime as _dt
 st.divider()
-st.markdown("""
+st.markdown(f"""
 ---
-**Version**: 0.1.0 MVP  
-**Last Updated**: 2024  
+**Version**: 0.1.0 MVP
+**Last Updated**: {_dt.date.today().year}
 For support or feedback, contact your analytics team.
 """)
