@@ -10,7 +10,10 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import Dict, List, Optional
+
+_TZ = ZoneInfo("Asia/Singapore")
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +74,7 @@ def save_run(forecast_results: Dict, feature_cols: List[str]) -> bool:
                 json.dump(model_meta, f, default=_json_default, indent=2)
 
         metadata = {
-            "last_run": datetime.now().isoformat(),
+            "last_run": datetime.now(_TZ).isoformat(),
             "total_skus": summary.get("total_active_skus", 0),
             "total_reorder_qty": float(summary.get("total_reorder_qty", 0)),
             "model_available": model is not None,
