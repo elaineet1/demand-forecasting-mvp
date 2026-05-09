@@ -1,6 +1,6 @@
 # ML-Assisted Demand & OTB Forecasting MVP
 
-**Version**: 0.3.0  
+**Version**: 0.3.1  
 **Purpose**: Hybrid ML + business-rules forecasting for retail inventory planning  
 **Target Users**: Management, planners, and buyers
 
@@ -185,10 +185,13 @@ See [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md) for the full step-by-step setup guide
 | `/reorders` | Top 5 SKUs needing reorder |
 | `/health` | Understock / healthy / overstock breakdown |
 | `/sku ITEM_NO` | Full detail for a specific SKU |
+| `/status` | Diagnostics — artifact path, file presence, last run time |
 | `/clearchat` | Reset your conversation history |
 | Free text | RAG chat — questions answered from live forecast data |
 
 The bot reads from `artifacts/` on disk. Run a forecast in the web app first to populate it.
+
+> **Note:** Always upload and run forecasts on the **Railway URL**, not Streamlit Cloud. The bot only reads from Railway's persistent volume.
 
 ---
 
@@ -222,6 +225,11 @@ The app automatically recognises common column name variations:
 | `total_stock` | Total Stock, On Hand, Qty on Hand, Inventory |
 | `quantity` | Qty, Qty Sold, Units Sold, Quantity Sold |
 | `forecast_qty` | Forecast Qty, Forecast Quantity, Projected Qty |
+| `base_price` | Base Price, BasePrice, Unit Price, Cost Price |
+| `last_purchase_price` | Last Purchase Price, LastPurchasePrice |
+| `evaluated_price` | Evaluated Price, EvaluatedPrice |
+
+Row counter columns (`#`, `No.`, `S/N`, etc.) are silently ignored.
 
 ---
 
@@ -244,7 +252,13 @@ MODEL_OUTLIER_IQR_MULTIPLIER = 3.0      # Outlier clipping threshold
 Add `OPENAI_API_KEY` to `.streamlit/secrets.toml` (local) or Railway Variables (deployed).
 
 **Telegram bot has no data to answer from**  
-Run a forecast in the web app first — the bot reads from `artifacts/` which is populated after each pipeline run.
+Run a forecast in the **Railway** web app first — the bot reads from `/app/artifacts` on the Railway volume. Use `/status` on the bot to confirm the artifact path and last run time.
+
+**Telegram bot shows stale data after a new forecast**  
+Check the Upload page for a red or yellow persistence message after running the forecast. A red box shows the exact error. Common causes: alphanumeric `item_no` values (fixed in v0.3.1), permission issues on the Railway volume.
+
+**Timestamps show wrong time**  
+Timestamps are stored in Singapore time (UTC+8). If running in a different region, change `_TZ` in `src/persistence.py`.
 
 **Dates not parsing from filenames**  
 Use format `DD.MM.YYYY` or `DD.MM.YYYY - DD.MM.YYYY` in the filename.
@@ -270,6 +284,6 @@ Expected for new SKUs with no sales history. Populates once sales data exists.
 
 ---
 
-**Last Updated**: May 2026 (v0.3.0 — Railway deployment, Telegram bot, disk persistence)  
+**Last Updated**: May 2026 (v0.3.1 — persistence fixes, /status command, SGT timestamps, column mapper improvements)  
 **Python**: 3.11+  
 **Status**: MVP — production-ready for small-scale use
