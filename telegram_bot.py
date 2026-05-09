@@ -33,6 +33,9 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
 
+# Suppress httpx logs to prevent bot token appearing in Railway logs
+logging.getLogger("httpx").setLevel(logging.WARNING)
+
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 STREAMLIT_APP_URL = os.getenv("STREAMLIT_APP_URL", "https://demand-forecasting-mvp.streamlit.app")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
