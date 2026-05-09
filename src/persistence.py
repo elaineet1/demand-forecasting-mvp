@@ -11,7 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
 
-ARTIFACTS_DIR = Path("artifacts")
+# Absolute path anchored to project root — works regardless of working directory
+ARTIFACTS_DIR = Path(__file__).resolve().parent.parent / "artifacts"
 _MODEL_PATH = ARTIFACTS_DIR / "model.pkl"
 _FEATURES_PATH = ARTIFACTS_DIR / "feature_cols.pkl"
 _PLANNER_PATH = ARTIFACTS_DIR / "planner_output.parquet"

@@ -81,7 +81,13 @@ def _no_data_msg() -> str:
 
 
 def _load_run() -> dict | None:
-    return persistence.load_run()
+    run = persistence.load_run()
+    if run is None:
+        logger.warning("No forecast artifacts found on disk.")
+    else:
+        meta = run.get("metadata", {})
+        logger.info("Loaded forecast: %s SKUs, last run %s", meta.get("total_skus", "?"), meta.get("last_run", "?")[:16])
+    return run
 
 
 # ==============================================================================
