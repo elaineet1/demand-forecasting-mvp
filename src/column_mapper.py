@@ -230,15 +230,23 @@ def get_column_mapping_summary(original_cols: List[str]) -> Dict[str, str]:
     return summary
 
 
+_IGNORABLE_COLUMNS = {
+    "#", "no.", "no", "sr", "sr.", "sr no", "s/n", "sn", "seq", "row", "index", "",
+}
+
 def get_unmapped_columns(original_cols: List[str]) -> List[str]:
     """
     Identify columns that don't map to any standard name.
-    
+    Silently excludes known noise columns (row counters, index columns).
+
     Args:
         original_cols: List of column names
-    
+
     Returns:
-        List of unmapped column names
+        List of unmapped column names worth warning about
     """
     mapping = get_column_mapping_summary(original_cols)
-    return [col for col in original_cols if col not in mapping]
+    return [
+        col for col in original_cols
+        if col not in mapping and col.strip().lower() not in _IGNORABLE_COLUMNS
+    ]
