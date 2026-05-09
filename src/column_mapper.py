@@ -33,7 +33,7 @@ COLUMN_VARIANTS = {
         '$warehsestock', 'wh stock', 'warehouse qty'
     ],
     'base_price': [
-        'base price', 'base_price', 'unit price', 'unit_price',
+        'base price', 'base_price', 'baseprice', 'unit price', 'unit_price',
         'cost price', 'cost_price', 'purchase price'
     ],
     'rrp': [
@@ -42,12 +42,12 @@ COLUMN_VARIANTS = {
         'selling price', 'retail price'
     ],
     'last_purchase_price': [
-        'last purchase price', 'last_purchase_price', 'last purchase amt',
-        'last purchase amount', 'last_purchase_amount'
+        'last purchase price', 'last_purchase_price', 'lastpurchaseprice',
+        'last purchase amt', 'last purchase amount', 'last_purchase_amount'
     ],
     'evaluated_price': [
-        'evaluated price', 'evaluated_price', 'weighted avg price',
-        'average cost price', 'valuation price'
+        'evaluated price', 'evaluated_price', 'evaluatedprice',
+        'weighted avg price', 'average cost price', 'valuation price'
     ],
     'forecast_qty': [
         'forecast qty', 'forecast_qty', 'forecastqty', 'forecast quantity',
