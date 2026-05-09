@@ -14,6 +14,8 @@
 | **Web App (Streamlit Cloud — demo)** | https://demand-forecasting-mvp.streamlit.app |
 | **Telegram Bot** | Running permanently on Railway alongside the web app |
 
+> Upload and run forecasts on the **Railway URL** — this is the live deployment shared with the Telegram bot.
+
 ---
 
 ## What It Does
@@ -189,10 +191,6 @@ See [RAILWAY_DEPLOY.md](RAILWAY_DEPLOY.md) for the full step-by-step setup guide
 | `/clearchat` | Reset your conversation history |
 | Free text | RAG chat — questions answered from live forecast data |
 
-The bot reads from `artifacts/` on disk. Run a forecast in the web app first to populate it.
-
-> **Note:** Always upload and run forecasts on the **Railway URL**, not Streamlit Cloud. The bot only reads from Railway's persistent volume.
-
 ---
 
 ## Data Format
@@ -243,34 +241,6 @@ MIN_HISTORY_FOR_ML = 2                  # Min monthly observations to use ML
 LOW_VOLUME_THRESHOLD = 20               # Units/month below which ML is bypassed
 MODEL_OUTLIER_IQR_MULTIPLIER = 3.0      # Outlier clipping threshold
 ```
-
----
-
-## Troubleshooting
-
-**Sidebar chatbot does not appear**  
-Add `OPENAI_API_KEY` to `.streamlit/secrets.toml` (local) or Railway Variables (deployed).
-
-**Telegram bot has no data to answer from**  
-Run a forecast in the **Railway** web app first — the bot reads from `/app/artifacts` on the Railway volume. Use `/status` on the bot to confirm the artifact path and last run time.
-
-**Telegram bot shows stale data after a new forecast**  
-Check the Upload page for a red or yellow persistence message after running the forecast. A red box shows the exact error. Common causes: alphanumeric `item_no` values (fixed in v0.3.1), permission issues on the Railway volume.
-
-**Timestamps show wrong time**  
-Timestamps are stored in Singapore time (UTC+8). If running in a different region, change `_TZ` in `src/persistence.py`.
-
-**Dates not parsing from filenames**  
-Use format `DD.MM.YYYY` or `DD.MM.YYYY - DD.MM.YYYY` in the filename.
-
-**Column mapping warnings**  
-Review warnings on the Upload page. Add new variants to `src/column_mapper.py` if needed.
-
-**Insufficient data for ML**  
-Upload at least 3 months of files. 6–12 months recommended, 12+ best for seasonality.
-
-**Stock cover shows N/A**  
-Expected for new SKUs with no sales history. Populates once sales data exists.
 
 ---
 
