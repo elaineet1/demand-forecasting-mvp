@@ -78,7 +78,7 @@ def save_run(forecast_results: Dict, feature_cols: List[str]) -> bool:
         return True
     except Exception as e:
         logger.error("Could not save artifacts to %s: %s", ARTIFACTS_DIR, e)
-        return False
+        raise
 
 
 def load_run() -> Optional[Dict]:

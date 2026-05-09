@@ -312,7 +312,10 @@ def end_to_end_forecast_pipeline(
         results['feature_cols'] = feature_cols
         results['success'] = True
 
-        persistence.save_run(results, feature_cols)
+        try:
+            persistence.save_run(results, feature_cols)
+        except Exception as save_err:
+            results['warnings'].append(f"Could not save to disk: {save_err}")
 
         if verbose:
             print("✓ Pipeline complete!")
