@@ -48,7 +48,12 @@ def save_run(forecast_results: Dict, feature_cols: List[str]) -> bool:
 
         planner_output = forecast_results.get("planner_output")
         if planner_output is not None and not planner_output.empty:
-            planner_output.to_parquet(_PLANNER_PATH, index=False)
+            out = planner_output.copy()
+            # item_no can be alphanumeric — force to str so PyArrow doesn't
+            # infer int64 and fail when it encounters values like '56056278A'.
+            if "item_no" in out.columns:
+                out["item_no"] = out["item_no"].astype(str)
+            out.to_parquet(_PLANNER_PATH, index=False)
 
         summary = forecast_results.get("planning_summary", {})
         with open(_SUMMARY_PATH, "w") as f:
