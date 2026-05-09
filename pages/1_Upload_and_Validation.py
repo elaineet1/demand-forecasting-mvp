@@ -103,6 +103,24 @@ def _run_pipeline(inventory_data, sales_data, calendar_data, use_simple_3m, show
         st.session_state[config.STATE_MASTER_DATA] = pipeline_results['master_data']
         st.session_state[config.STATE_MODEL] = pipeline_results['model']
         st.session_state[config.STATE_MODEL_METRICS] = pipeline_results['model_results']
+
+        try:
+            feature_cols = pipeline_results.get('feature_cols', [])
+            saved = persistence.save_run(pipeline_results, feature_cols)
+            if saved:
+                meta = persistence.get_metadata()
+                st.info(
+                    f"💾 Saved to disk: `{persistence.ARTIFACTS_DIR}` "
+                    f"— last run: {meta.get('last_run', '?')[:19]}"
+                )
+            else:
+                st.warning(
+                    f"⚠️ Could not save to `{persistence.ARTIFACTS_DIR}`. "
+                    "Telegram bot will see old data."
+                )
+        except Exception as e:
+            st.error(f"❌ Persistence error at `{persistence.ARTIFACTS_DIR}`: {e}")
+
     else:
         st.error("❌ Pipeline failed")
         for error in pipeline_results['errors']:
@@ -272,12 +290,30 @@ if submitted:
                 if pipeline_results['success']:
                     st.success("✅ Files processed successfully!")
                     st.balloons()
-                    
+
                     # Store in session state
                     st.session_state[config.STATE_MASTER_DATA] = pipeline_results['master_data']
                     st.session_state[config.STATE_MODEL] = pipeline_results['model']
                     st.session_state[config.STATE_MODEL_METRICS] = pipeline_results['model_results']
-                    
+
+                    # Explicit persistence check — visible in UI
+                    try:
+                        feature_cols = pipeline_results.get('feature_cols', [])
+                        saved = persistence.save_run(pipeline_results, feature_cols)
+                        if saved:
+                            meta = persistence.get_metadata()
+                            st.info(
+                                f"💾 Saved to disk: `{persistence.ARTIFACTS_DIR}` "
+                                f"— last run: {meta.get('last_run', '?')[:19]}"
+                            )
+                        else:
+                            st.warning(
+                                f"⚠️ Could not save to `{persistence.ARTIFACTS_DIR}`. "
+                                "Telegram bot will see old data. Check Railway logs for details."
+                            )
+                    except Exception as e:
+                        st.error(f"❌ Persistence error at `{persistence.ARTIFACTS_DIR}`: {e}")
+
                 else:
                     st.error("❌ Pipeline failed")
                     for error in pipeline_results['errors']:
