@@ -45,20 +45,23 @@ OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4.1-mini")
 # In-process embedding cache (shared across all users, invalidated by mtime)
 # ==============================================================================
 
-_emb_cache: dict = {"mtime": None, "embeddings": None, "documents": None}
+_emb_cache: dict = {"last_run": None, "embeddings": None, "documents": None}
 
 
 def _get_embeddings(forecast_results: dict) -> tuple:
-    """Return cached embeddings, recomputing when planner data changes."""
-    mtime = persistence.planner_mtime()
-    if _emb_cache["mtime"] == mtime and _emb_cache["embeddings"] is not None:
+    """Return cached embeddings, recomputing when last_run timestamp changes."""
+    # Use last_run from metadata rather than filesystem mtime — more reliable on
+    # network-attached storage (Railway volumes) where stat() mtime can be stale.
+    last_run = forecast_results.get("metadata", {}).get("last_run", "")
+    if last_run and _emb_cache["last_run"] == last_run and _emb_cache["embeddings"] is not None:
         return _emb_cache["embeddings"], _emb_cache["documents"]
 
     documents = build_documents_from_forecast(forecast_results)
     embeddings, docs = get_or_create_embeddings(documents, api_key=OPENAI_API_KEY)
-    _emb_cache["mtime"] = mtime
+    _emb_cache["last_run"] = last_run
     _emb_cache["embeddings"] = embeddings
     _emb_cache["documents"] = docs
+    logger.info("Embeddings recomputed (last_run=%s)", last_run[:16] if last_run else "unknown")
     return embeddings, docs
 
 
@@ -150,6 +153,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/reorders  — top 5 reorder SKUs\n"
         "/health    — stock health breakdown\n"
         "/sku ITEM  — detail for one SKU\n"
+        "/status    — bot diagnostics (artifact path & last run)\n"
         "/clearchat — reset chat history\n\n"
         "💬 Or just *type any question* to chat with your forecast data — "
         "e.g. _Which brand has the most overstock?_ or _What is the reorder for item ABC123?_",
@@ -320,6 +324,28 @@ async def sku_cmd(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(text[:4096], parse_mode="Markdown")
 
 
+async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Debug: show artifact path, file existence, and last_run timestamp."""
+    from src.persistence import ARTIFACTS_DIR, _PLANNER_PATH, _METADATA_PATH
+    meta = persistence.get_metadata()
+    last_run = meta.get("last_run", "no data")
+    if last_run != "no data":
+        last_run = last_run[:19].replace("T", " ")
+
+    planner_exists = _PLANNER_PATH.exists()
+    meta_exists = _METADATA_PATH.exists()
+
+    lines = [
+        "🔧 *Bot Status*\n",
+        f"Artifacts dir: `{ARTIFACTS_DIR}`",
+        f"Planner file: {'✅ exists' if planner_exists else '❌ missing'}",
+        f"Metadata file: {'✅ exists' if meta_exists else '❌ missing'}",
+        f"Last forecast run: `{last_run}`",
+        f"Embedding cache key: `{_emb_cache['last_run'][:16] if _emb_cache['last_run'] else 'not computed'}`",
+    ]
+    await update.message.reply_text("\n".join(lines), parse_mode="Markdown")
+
+
 async def clearchat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["history"] = []
     await update.message.reply_text("✅ Chat history cleared.")
@@ -446,6 +472,7 @@ def main():
     app.add_handler(CommandHandler("reorders", reorders))
     app.add_handler(CommandHandler("health", health))
     app.add_handler(CommandHandler("sku", sku_cmd))
+    app.add_handler(CommandHandler("status", status))
     app.add_handler(CommandHandler("clearchat", clearchat))
     app.add_handler(CallbackQueryHandler(button_handler))
 

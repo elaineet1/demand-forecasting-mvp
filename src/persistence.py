@@ -4,12 +4,15 @@ Survives Streamlit session resets and can be read by external processes (e.g. Te
 """
 
 import json
+import logging
 import joblib
 import pandas as pd
 import numpy as np
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional
+
+logger = logging.getLogger(__name__)
 
 # Absolute path anchored to project root — works regardless of working directory
 ARTIFACTS_DIR = Path(__file__).resolve().parent.parent / "artifacts"
@@ -71,9 +74,10 @@ def save_run(forecast_results: Dict, feature_cols: List[str]) -> bool:
         with open(_METADATA_PATH, "w") as f:
             json.dump(metadata, f, indent=2)
 
+        logger.info("Artifacts saved to %s (last_run=%s)", ARTIFACTS_DIR, metadata["last_run"][:16])
         return True
     except Exception as e:
-        print(f"Warning: Could not save artifacts: {e}")
+        logger.error("Could not save artifacts to %s: %s", ARTIFACTS_DIR, e)
         return False
 
 
